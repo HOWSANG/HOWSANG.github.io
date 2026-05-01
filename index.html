@@ -1,0 +1,186 @@
+---
+layout: default
+---
+
+{% assign p = site.data.profile %}
+
+<div class="portfolio">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+
+    <div class="sidebar-top">
+      <div class="profile-photo">
+        {% if p.photo %}
+          <img src="{{ p.photo | relative_url }}" alt="{{ p.name }}" />
+        {% else %}
+          <div class="photo-placeholder"><i class="fa-solid fa-user"></i></div>
+        {% endif %}
+      </div>
+      <h1 class="profile-name">{{ p.name }}</h1>
+      <p class="profile-name-ko">{{ p.name_ko }}</p>
+      <span class="profile-title"><i class="fa-solid fa-circle-dot"></i>{{ p.title }}</span>
+    </div>
+
+    <div class="sidebar-body">
+
+      <blockquote class="tagline">"{{ p.tagline }}"</blockquote>
+
+      <!-- 연락처 -->
+      <section>
+        <h2 class="section-label">Contact</h2>
+        <ul class="contact-list">
+          {% if p.contact.email %}
+          <li><i class="fa-solid fa-envelope"></i>{{ p.contact.email }}</li>
+          {% endif %}
+          {% if p.contact.github %}
+          <li><i class="fa-brands fa-github"></i><a href="{{ p.contact.github }}" target="_blank">GitHub</a></li>
+          {% endif %}
+          {% if p.contact.linkedin %}
+          <li><i class="fa-brands fa-linkedin"></i><a href="{{ p.contact.linkedin }}" target="_blank">LinkedIn</a></li>
+          {% endif %}
+          {% if p.contact.location %}
+          <li><i class="fa-solid fa-location-dot"></i>{{ p.contact.location }}</li>
+          {% endif %}
+        </ul>
+      </section>
+
+      <!-- 기술 스택 -->
+      <section>
+        <h2 class="section-label">Skills</h2>
+        {% for group in site.data.skills %}
+        <div class="skill-group">
+          <h3 class="skill-category">{{ group.category }}</h3>
+          <ul class="skill-list">
+            {% for skill in group.items %}
+            <li class="skill-item">
+              <span class="skill-name">{{ skill.name }}</span>
+              <div class="skill-bar-track">
+                <div class="skill-bar-fill" style="width: {{ skill.level | times: 20 }}%"></div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </section>
+
+      <!-- 관심 분야 -->
+      <section>
+        <h2 class="section-label">Interests</h2>
+        <div class="tag-list">
+          {% for item in site.data.interests %}
+          <span class="tag">{{ item }}</span>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- 언어 -->
+      <section>
+        <h2 class="section-label">Languages</h2>
+        <ul class="contact-list">
+          {% for lang in p.languages %}
+          <li><i class="fa-solid fa-language"></i>{{ lang.name }} — {{ lang.level }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- 소개 -->
+    <section class="intro-section">
+      <p class="intro-text">{{ p.intro | newline_to_br }}</p>
+    </section>
+
+    <!-- 경력 -->
+    <section class="main-section">
+      <h2 class="main-section-title"><i class="fa-solid fa-briefcase"></i>Experience</h2>
+      {% for exp in site.data.experience %}
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div>
+            <span class="item-title">{{ exp.role }}</span>
+            <span class="item-sub"> @ {{ exp.company }}</span>
+          </div>
+          <span class="item-period">{{ exp.period }}</span>
+        </div>
+        <ul class="item-desc">
+          {% for point in exp.description %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </section>
+
+    <!-- 프로젝트 -->
+    <section class="main-section">
+      <h2 class="main-section-title"><i class="fa-solid fa-code"></i>Projects</h2>
+      <div class="project-grid">
+        {% for proj in site.data.projects %}
+        <div class="project-card">
+          <p class="project-title">{{ proj.title }}</p>
+          {% if proj.affiliation %}
+          <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
+          {% endif %}
+          <p class="project-summary">{{ proj.summary }}</p>
+          {% if proj.output %}
+          <div class="project-output">
+            <span class="output-label">산출물</span>
+            <ul>
+              {% assign output_items = proj.output | remove: "\n" | split: "," %}
+              {% for item in output_items %}
+              <li>{{ item | strip }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+          {% if proj.description %}
+          <p class="project-desc">{{ proj.description }}</p>
+          {% endif %}
+          <div class="project-footer">
+            <span class="item-period">{{ proj.period }}</span>
+            <div class="project-tags">
+              {% for tag in proj.tags %}
+              <span class="tag tag-project">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="project-links">
+            {% if proj.github and proj.github != "" %}
+            <a href="{{ proj.github }}" target="_blank"><i class="fa-brands fa-github"></i>GitHub</a>
+            {% endif %}
+            {% if proj.demo and proj.demo != "" %}
+            <a href="{{ proj.demo }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i>Demo</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 학력 -->
+    <section class="main-section">
+      <h2 class="main-section-title"><i class="fa-solid fa-graduation-cap"></i>Education</h2>
+      {% for edu in site.data.education %}
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div>
+            <span class="item-title">{{ edu.school }}</span>
+            <span class="item-sub"> — {{ edu.degree }}{% if edu.major and edu.major != "" %}, {{ edu.major }}{% endif %}</span>
+          </div>
+          <span class="item-period">{{ edu.period }}</span>
+        </div>
+        {% if edu.note and edu.note != "" %}
+        <p class="item-note">{{ edu.note }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </section>
+
+  </main>
+</div>

@@ -1,0 +1,31 @@
+# ============================================================
+# 프로필 기본 정보
+# ============================================================
+
+name: "Stella"           # 예: Howsang Jeon
+name_ko: "HEEWON CHOI"         # 예: 전호상
+title: "Data Scientist"
+tagline: "물음표를 느낌표로 바꾸는 일"      # 예: 데이터로 문제를 정의하고 해결하는 Data Scientist
+
+# 소개 (2~3문장, 포트폴리오 상단에 표시)
+intro: |
+  안녕하세요,
+  메타인지 사고로 스스로 성장하는 데이터 사이언티스트 최희원입니다.
+  데이터를 통해 문제를 정의하고 해결하는 과정을 즐깁니다.
+
+# 프로필 이미지 경로 (assets/images/ 에 넣고 파일명 입력)
+photo: "assets/images/profile.jpg"
+
+# 연락처
+contact:
+  email: "chw6221@gmail.com"
+  github: "https://github.com/HOWSANG"
+  linkedin: "www.linkedin.com/in/bonjour-hw"              # 예: https://linkedin.com/in/yourname
+  location: "Seoul, Korea"
+
+# 언어
+languages:
+  - name: "한국어"
+    level: "Native"
+  - name: "English"
+    level: "Basic"       # Native / Fluent / Business / Basic

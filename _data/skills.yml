@@ -1,0 +1,45 @@
+# ============================================================
+# 기술 스택
+# level: 1~5 (1=입문, 3=실무, 5=전문)
+# ============================================================
+
+- category: "언어"
+  items:
+    - name: "Python"
+      level: 5
+    - name: "SQL"
+      level: 4
+
+- category: "ML / DL"
+  items:
+    - name: "Scikit-learn"
+      level: 5
+    - name: "PyTorch"
+      level: 4
+    - name: "Keras"
+      level: 3
+
+- category: "데이터 처리"
+  items:
+    - name: "Pandas"
+      level: 5
+    - name: "NumPy"
+      level: 4
+
+- category: "시각화"
+  items:
+    - name: "Matplotlib"
+      level: 5
+    - name: "Seaborn"
+      level: 4
+    - name: "Plotly"
+      level: 4
+    
+- category: "인프라 / 협업"
+  items:
+    - name: "Notion"
+      level: 4
+    - name: "Jira"
+      level: 3
+    - name: "AWS"
+      level: 3

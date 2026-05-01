@@ -1,0 +1,32 @@
+# ============================================================
+# 경력 사항 (최신순)
+# ============================================================
+
+- company: "Impactive AI"
+  role: "Data Scientist"
+  period: "2025.12 ~ 재직중"
+  description:
+    - "시계열 데이터 기반 수요예측 모델 개발"
+    - "고객사 ERP 데이터 분석 및 시각화"
+
+- company: "willog"
+  role: "Data Analyst"
+  period: "2024.09 ~ 2025.05"
+  description:
+    - "서비스 지표 정의 및 데이터 웨어하우스/데이터 마트 설계"
+    - "클러스터링을 이용한 위치 데이터 클렌징"
+    - "디바이스 수집 센서 기반 시계열 데이터 검증"
+
+- company: "ECO BRAIN"
+  role: "Data Analyst"
+  period: "2024.06 ~ 2024.09"
+  description:
+    - "기상 API 허브를 이용한 AWS, ASOS 데이터 수집 및 가공"
+    - "ML/DL기반 온열질환자 예측 모델 개발 (기상청, 질병청)"
+
+- company: "Bigtech Plus"
+  role: "Data Scientist"
+  period: "2020.11 ~ 2024.03"
+  description:
+    - "B2C/B2B 서비스 기획 및 데이터 마트 구축"
+    - "부동산 공적장부 데이터분석 및 서비스 알고리즘 개발"
