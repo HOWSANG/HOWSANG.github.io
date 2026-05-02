@@ -96,6 +96,25 @@ layout: default
       <p class="intro-text">{{ p.intro | newline_to_br }}</p>
     </section>
 
+    <!-- 학력 -->
+    <section class="main-section">
+      <h2 class="main-section-title"><i class="fa-solid fa-graduation-cap"></i>Education</h2>
+      {% for edu in site.data.education %}
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div>
+            <span class="item-title">{{ edu.school }}</span>
+            <span class="item-sub"> — {{ edu.degree }}{% if edu.major and edu.major != "" %}, {{ edu.major }}{% endif %}</span>
+          </div>
+          <span class="item-period">{{ edu.period }}</span>
+        </div>
+        {% if edu.note and edu.note != "" %}
+        <p class="item-note">{{ edu.note }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </section>
+
     <!-- 경력 -->
     <section class="main-section">
       <h2 class="main-section-title"><i class="fa-solid fa-briefcase"></i>Experience</h2>
@@ -113,25 +132,6 @@ layout: default
           <li>{{ point }}</li>
           {% endfor %}
         </ul>
-      </div>
-      {% endfor %}
-    </section>
-
-    <!-- 학력 -->
-    <section class="main-section">
-      <h2 class="main-section-title"><i class="fa-solid fa-graduation-cap"></i>Education</h2>
-      {% for edu in site.data.education %}
-      <div class="timeline-item">
-        <div class="timeline-header">
-          <div>
-            <span class="item-title">{{ edu.school }}</span>
-            <span class="item-sub"> — {{ edu.degree }}{% if edu.major and edu.major != "" %}, {{ edu.major }}{% endif %}</span>
-          </div>
-          <span class="item-period">{{ edu.period }}</span>
-        </div>
-        {% if edu.note and edu.note != "" %}
-        <p class="item-note">{{ edu.note }}</p>
-        {% endif %}
       </div>
       {% endfor %}
     </section>
