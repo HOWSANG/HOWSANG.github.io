@@ -153,7 +153,19 @@ layout: default
           {% if proj.affiliation %}
           <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
           {% endif %}
+          {% if proj.summary %}
           <p class="project-summary">{{ proj.summary }}</p>
+          {% endif %}
+          {% if proj.tasks %}
+          <div class="project-output">
+            <span class="output-label">담당업무</span>
+            <ul>
+              {% for task in proj.tasks %}
+              <li>{{ task }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
           {% if proj.output %}
           <div class="project-output">
             <span class="output-label">산출물</span>
