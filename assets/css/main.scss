@@ -338,6 +338,45 @@ body {
 }
 
 /* Projects */
+.project-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+
+.project-tab {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: $muted;
+  background: transparent;
+  border: 1px solid $border;
+  border-radius: 999px;
+  padding: .35rem .85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  transition: color .2s, border-color .2s, background .2s;
+
+  &:hover { color: $accent-dim; border-color: $accent; }
+
+  &.active {
+    color: #fff;
+    background: $accent-dim;
+    border-color: $accent-dim;
+  }
+}
+
+.project-tab-count {
+  font-size: 0.68rem;
+  opacity: .75;
+}
+
+.project-panel { display: none; }
+.project-panel.active { display: grid; }
+
 .project-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

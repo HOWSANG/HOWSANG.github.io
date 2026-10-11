@@ -139,8 +139,15 @@ layout: default
     <!-- 프로젝트 -->
     <section class="main-section">
       <h2 class="main-section-title"><i class="fa-solid fa-code"></i>Projects</h2>
-      <div class="project-grid">
-        {% for proj in site.data.projects %}
+      {% assign project_groups = site.data.projects | group_by: "affiliation" %}
+      <div class="project-tabs" role="tablist">
+        {% for group in project_groups %}
+        <button type="button" class="project-tab{% if forloop.first %} active{% endif %}" role="tab" data-tab="proj-{{ forloop.index }}">{{ group.name }}<span class="project-tab-count">{{ group.size }}</span></button>
+        {% endfor %}
+      </div>
+      {% for group in project_groups %}
+      <div class="project-grid project-panel{% if forloop.first %} active{% endif %}" id="proj-{{ forloop.index }}" role="tabpanel">
+        {% for proj in group.items %}
         <div class="project-card">
           <p class="project-title">{{ proj.title }}</p>
           {% if proj.affiliation %}
@@ -180,7 +187,20 @@ layout: default
         </div>
         {% endfor %}
       </div>
+      {% endfor %}
     </section>
 
   </main>
 </div>
+
+<script>
+  document.querySelectorAll('.project-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.project-tab, .project-panel').forEach(function (el) {
+        el.classList.remove('active');
+      });
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
