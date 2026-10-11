@@ -270,6 +270,28 @@ body {
   i { color: $accent; font-size: .85rem; }
 }
 
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .25rem 1rem;
+  margin-bottom: 1.1rem;
+
+  .main-section-title { margin-bottom: 0; }
+}
+
+.section-hint {
+  font-size: 0.72rem;
+  color: $muted;
+
+  i {
+    font-size: .6rem;
+    color: $accent-dim;
+    margin: 0 .1rem;
+  }
+}
+
 /* Tenure chart */
 .tenure-panel {
   background: #f8fafc;

@@ -140,7 +140,10 @@ layout: default
 
     <!-- 프로젝트 -->
     <section class="main-section" id="projects">
-      <h2 class="main-section-title"><i class="fa-solid fa-code"></i>Projects</h2>
+      <div class="section-head">
+        <h2 class="main-section-title"><i class="fa-solid fa-code"></i>Projects</h2>
+        <p class="section-hint">카드의 <i class="fa-solid fa-chevron-down" aria-hidden="true"></i> 화살표를 누르면 담당업무와 산출물을 확인할 수 있습니다.</p>
+      </div>
       {% assign project_groups = site.data.projects | group_by: "affiliation" %}
       {% assign default_tab = project_groups.first.name %}
       <div class="project-tabs" role="tablist">
