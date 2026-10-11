@@ -3,6 +3,7 @@
 # ============================================================
 
 - company: "Impactive AI"
+  company_desc: "자체 수요예측 AI 솔루션 '딥플로우(DeepFlow)'로 제조·유통 기업의 재고와 생산 의사결정을 돕는 AI 기업"
   role: "Data Scientist"
   period: "2025.12 ~ 재직중"
   description:
@@ -10,6 +11,7 @@
     - "고객사 ERP 데이터 분석 및 시각화"
 
 - company: "willog"
+  company_desc: "IoT 센서와 데이터 플랫폼으로 콜드체인 물류의 온도·습도·충격을 실시간 모니터링하는 물류 기업"
   role: "Data Analyst"
   period: "2024.09 ~ 2025.05"
   description:
@@ -18,6 +20,7 @@
     - "디바이스 수집 센서 기반 시계열 데이터 검증"
 
 - company: "ECO BRAIN"
+  company_desc: "기상·기후 데이터와 AI로 재생에너지 발전량 예측, 위험기상 조기경보, 산불 예측 솔루션을 제공하는 기후테크 기업"
   role: "Data Analyst"
   period: "2024.06 ~ 2024.09"
   description:
@@ -25,6 +28,7 @@
     - "ML/DL기반 온열질환자 예측 모델 개발 (기상청, 질병청)"
 
 - company: "Bigtech Plus"
+  company_desc: "등기부·건축물대장 같은 부동산 공적장부를 분석해 전세보증금 보호와 주택 추천 서비스를 제공하는 부동산 데이터 기업"
   role: "Data Scientist"
   period: "2020.11 ~ 2024.03"
   description:

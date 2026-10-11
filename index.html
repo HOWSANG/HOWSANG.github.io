@@ -127,6 +127,9 @@ layout: default
           </div>
           <span class="item-period">{{ exp.period }}</span>
         </div>
+        {% if exp.company_desc %}
+        <p class="item-note">{{ exp.company_desc }}</p>
+        {% endif %}
         <ul class="item-desc">
           {% for point in exp.description %}
           <li>{{ point }}</li>
