@@ -116,7 +116,6 @@ layout: default
       <div class="tenure-panel">
         <p class="tenure-label"><i class="fa-solid fa-chart-gantt"></i>Career Timeline</p>
         <div id="tenure-chart" class="tenure-chart" role="img" aria-label="회사별 재직 기간을 한 줄로 이은 커리어 리본"></div>
-        <ul class="tenure-legend" id="tenure-legend"></ul>
       </div>
       {% for exp in site.data.experience %}
       <div class="timeline-item{% if exp.period contains '재직중' %} is-current{% endif %}">
@@ -259,29 +258,37 @@ layout: default
       if (next && r.end > next.start) r.end = next.start;
     });
 
-    var ink = '#1e293b', muted = '#64748b', surface = '#f8fafc';
-    // 회사 식별용 색 (입사 순서로 고정 배정, 팔레트 검증 완료)
-    var palette = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100'];
-    rows.forEach(function (r, i) { r.color = palette[i % palette.length]; });
+    var ink = '#1e293b', secondary = '#475569', muted = '#64748b', surface = '#f8fafc';
+    // 이전 회사는 서로 구분되는 차분한 색, 현재 회사는 가장 진한 강조색 (팔레트 검증 완료)
+    var pastColors = ['#9a8fe3', '#e8875c', '#3fb68c'], currentColor = '#0369a1';
+    var pastIndex = 0;
+    rows.forEach(function (r) {
+      r.color = r.current ? currentColor : pastColors[pastIndex++ % pastColors.length];
+    });
     var first = rows[0].start, last = rows[rows.length - 1].end;
     var padMs = 1000 * 60 * 60 * 24 * 120;
-
     var narrow = el.clientWidth < 520;
+
     var segments = {
       type: 'bar', orientation: 'h',
       y: rows.map(function () { return 0; }),
       base: rows.map(function (r) { return r.start.toISOString(); }),
       x: rows.map(function (r) { return r.end - r.start; }),
-      width: narrow ? 0.4 : 0.24,
+      width: rows.map(function (r) { return r.current ? (narrow ? 0.34 : 0.3) : (narrow ? 0.22 : 0.18); }),
       marker: { color: rows.map(function (r) { return r.color; }), cornerradius: 4, line: { color: surface, width: 2 } },
       customdata: rows.map(function (r) { return [r.company, r.role, r.period, r.duration]; }),
       hovertemplate: '<b>%{customdata[0]}</b> · %{customdata[1]}<br>%{customdata[2]}<br>재직 %{customdata[3]}<extra></extra>'
     };
 
+    var nowGlow = {
+      type: 'scatter', mode: 'markers', hoverinfo: 'skip',
+      x: [last.toISOString()], y: [0],
+      marker: { size: 24, color: 'rgba(3,105,161,.18)' }
+    };
     var now = {
       type: 'scatter', mode: 'markers',
       x: [last.toISOString()], y: [0],
-      marker: { size: 11, color: rows[rows.length - 1].color, line: { color: surface, width: 2 } },
+      marker: { size: 12, color: currentColor, line: { color: surface, width: 2 } },
       hovertemplate: '현재<extra></extra>'
     };
 
@@ -289,43 +296,47 @@ layout: default
     var rangeStart = first.getTime() - padMs, rangeEnd = last.getTime() + padMs;
     var pxPerMs = (el.clientWidth - 24) / (rangeEnd - rangeStart);
     var ctx = document.createElement('canvas').getContext('2d');
-    function textWidth(str, bold) {
-      ctx.font = (bold ? '700 ' : '400 ') + fontSize + 'px Inter, "Noto Sans KR", sans-serif';
+    function textWidth(str, bold, size) {
+      ctx.font = (bold ? '700 ' : '400 ') + size + 'px Inter, "Noto Sans KR", sans-serif';
       return ctx.measureText(str).width;
     }
 
-    // 라벨이 겹치지 않도록 위·아래 중 비어 있는 쪽에 배치
-    var laneEnd = { above: -Infinity, below: -Infinity };
-    var legend = document.getElementById('tenure-legend');
-    rows.slice().reverse().forEach(function (r) {
-      var li = document.createElement('li');
-      li.innerHTML = '<span class="tenure-swatch" style="background:' + r.color + '"></span>' +
-        '<span class="tenure-legend-name"></span><span class="tenure-legend-dur"></span>';
-      li.querySelector('.tenure-legend-name').textContent = r.company;
-      li.querySelector('.tenure-legend-dur').textContent = r.duration;
-      legend.appendChild(li);
-    });
-
-    // 좁은 화면에서는 범례가 회사 식별을 맡고, 막대 옆 라벨은 생략
-    var labels = narrow ? [] : rows.map(function (r) {
+    // 현재 회사 라벨을 먼저 위쪽에 두고, 나머지는 겹치지 않는 쪽(위·아래)에 배치
+    var lanes = { above: [], below: [] };
+    function fits(lane, l, r) {
+      return lanes[lane].every(function (iv) { return r <= iv[0] || l >= iv[1]; });
+    }
+    var order = rows.slice().sort(function (a, b) { return (b.current ? 1 : 0) - (a.current ? 1 : 0); });
+    var labels = order.map(function (r) {
+      var size = r.current ? fontSize + 1.5 : fontSize;
       var mid = (r.start.getTime() + r.end.getTime()) / 2;
       var cx = (mid - rangeStart) * pxPerMs;
-      var half = Math.max(textWidth('● ' + r.company, true), textWidth(r.duration)) / 2 + 8;
-      var lane = cx - half >= laneEnd.above ? 'above'
-        : cx - half >= laneEnd.below ? 'below'
-        : (laneEnd.above <= laneEnd.below ? 'above' : 'below');
-      laneEnd[lane] = cx + half;
+      var showDuration = !narrow || r.current;
+      var half = Math.max(textWidth(r.company, true, size), showDuration ? textWidth(r.duration, false, size) : 0) / 2 + 6;
+      // 위·아래 중 들어갈 자리를 찾고, 없으면 좌우로 조금씩 밀어 빈 자리를 찾음
+      var width = el.clientWidth - 24, lane = 'below', shift = 0, found = false;
+      for (var d = 0; d <= 80 && !found; d += 4) {
+        [d, -d].some(function (dx) {
+          return ['above', 'below'].some(function (ln) {
+            var l = cx - half + dx, rr = cx + half + dx;
+            if (l < 0 || rr > width || !fits(ln, l, rr)) return false;
+            lane = ln; shift = dx; found = true; return true;
+          });
+        });
+      }
+      lanes[lane].push([cx - half + shift, cx + half + shift]);
       var above = lane === 'above';
+      var name = r.current ? '<b>' + r.company + '</b>' : r.company;
       return {
         x: new Date(mid).toISOString(), y: 0,
-        yshift: above ? 16 : -16, yanchor: above ? 'bottom' : 'top',
-        text: '<span style="color:' + r.color + '">●</span> <b>' + r.company + '</b><br><span style="color:' + muted + '">' + r.duration + '</span>',
-        showarrow: false, align: 'center', font: { size: fontSize, color: ink }
+        xshift: shift, yshift: above ? 16 : -16, yanchor: above ? 'bottom' : 'top',
+        text: name + (showDuration ? '<br><span style="color:' + muted + '">' + r.duration + '</span>' : ''),
+        showarrow: false, align: 'center', font: { size: size, color: r.current ? ink : secondary }
       };
     });
 
-    Plotly.newPlot(el, [segments, now], {
-      height: narrow ? 90 : 170,
+    Plotly.newPlot(el, [segments, nowGlow, now], {
+      height: narrow ? 140 : 170,
       margin: { l: 12, r: 12, t: 4, b: 26 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
