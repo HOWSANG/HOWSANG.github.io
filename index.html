@@ -116,6 +116,7 @@ layout: default
       <div class="tenure-panel">
         <p class="tenure-label"><i class="fa-solid fa-chart-gantt"></i>Career Timeline</p>
         <div id="tenure-chart" class="tenure-chart" role="img" aria-label="회사별 재직 기간을 한 줄로 이은 커리어 리본"></div>
+        <ul class="tenure-legend" id="tenure-legend"></ul>
       </div>
       {% for exp in site.data.experience %}
       <div class="timeline-item{% if exp.period contains '재직중' %} is-current{% endif %}">
@@ -258,17 +259,21 @@ layout: default
       if (next && r.end > next.start) r.end = next.start;
     });
 
-    var ink = '#1e293b', muted = '#64748b', surface = '#f8fafc', bar = '#0284c7';
+    var ink = '#1e293b', muted = '#64748b', surface = '#f8fafc';
+    // 회사 식별용 색 (입사 순서로 고정 배정, 팔레트 검증 완료)
+    var palette = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100'];
+    rows.forEach(function (r, i) { r.color = palette[i % palette.length]; });
     var first = rows[0].start, last = rows[rows.length - 1].end;
     var padMs = 1000 * 60 * 60 * 24 * 120;
 
+    var narrow = el.clientWidth < 520;
     var segments = {
       type: 'bar', orientation: 'h',
       y: rows.map(function () { return 0; }),
       base: rows.map(function (r) { return r.start.toISOString(); }),
       x: rows.map(function (r) { return r.end - r.start; }),
-      width: 0.24,
-      marker: { color: bar, cornerradius: 4, line: { color: surface, width: 2 } },
+      width: narrow ? 0.4 : 0.24,
+      marker: { color: rows.map(function (r) { return r.color; }), cornerradius: 4, line: { color: surface, width: 2 } },
       customdata: rows.map(function (r) { return [r.company, r.role, r.period, r.duration]; }),
       hovertemplate: '<b>%{customdata[0]}</b> · %{customdata[1]}<br>%{customdata[2]}<br>재직 %{customdata[3]}<extra></extra>'
     };
@@ -276,26 +281,36 @@ layout: default
     var now = {
       type: 'scatter', mode: 'markers',
       x: [last.toISOString()], y: [0],
-      marker: { size: 11, color: bar, line: { color: surface, width: 2 } },
+      marker: { size: 11, color: rows[rows.length - 1].color, line: { color: surface, width: 2 } },
       hovertemplate: '현재<extra></extra>'
     };
 
-    var narrow = el.clientWidth < 520;
     var fontSize = narrow ? 10 : 11.5;
     var rangeStart = first.getTime() - padMs, rangeEnd = last.getTime() + padMs;
     var pxPerMs = (el.clientWidth - 24) / (rangeEnd - rangeStart);
-    function textWidth(str) {
-      return str.split('').reduce(function (w, ch) {
-        return w + (ch.charCodeAt(0) > 127 ? fontSize : fontSize * 0.62);
-      }, 0);
+    var ctx = document.createElement('canvas').getContext('2d');
+    function textWidth(str, bold) {
+      ctx.font = (bold ? '700 ' : '400 ') + fontSize + 'px Inter, "Noto Sans KR", sans-serif';
+      return ctx.measureText(str).width;
     }
 
     // 라벨이 겹치지 않도록 위·아래 중 비어 있는 쪽에 배치
     var laneEnd = { above: -Infinity, below: -Infinity };
-    var labels = rows.map(function (r) {
+    var legend = document.getElementById('tenure-legend');
+    rows.slice().reverse().forEach(function (r) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="tenure-swatch" style="background:' + r.color + '"></span>' +
+        '<span class="tenure-legend-name"></span><span class="tenure-legend-dur"></span>';
+      li.querySelector('.tenure-legend-name').textContent = r.company;
+      li.querySelector('.tenure-legend-dur').textContent = r.duration;
+      legend.appendChild(li);
+    });
+
+    // 좁은 화면에서는 범례가 회사 식별을 맡고, 막대 옆 라벨은 생략
+    var labels = narrow ? [] : rows.map(function (r) {
       var mid = (r.start.getTime() + r.end.getTime()) / 2;
       var cx = (mid - rangeStart) * pxPerMs;
-      var half = Math.max(textWidth(r.company) * 1.08, textWidth(r.duration)) / 2 + 6;
+      var half = Math.max(textWidth('● ' + r.company, true), textWidth(r.duration)) / 2 + 8;
       var lane = cx - half >= laneEnd.above ? 'above'
         : cx - half >= laneEnd.below ? 'below'
         : (laneEnd.above <= laneEnd.below ? 'above' : 'below');
@@ -304,13 +319,13 @@ layout: default
       return {
         x: new Date(mid).toISOString(), y: 0,
         yshift: above ? 16 : -16, yanchor: above ? 'bottom' : 'top',
-        text: '<b>' + r.company + '</b><br><span style="color:' + muted + '">' + r.duration + '</span>',
+        text: '<span style="color:' + r.color + '">●</span> <b>' + r.company + '</b><br><span style="color:' + muted + '">' + r.duration + '</span>',
         showarrow: false, align: 'center', font: { size: fontSize, color: ink }
       };
     });
 
     Plotly.newPlot(el, [segments, now], {
-      height: 170,
+      height: narrow ? 90 : 170,
       margin: { l: 12, r: 12, t: 4, b: 26 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
