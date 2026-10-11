@@ -51,16 +51,11 @@ layout: default
         {% for group in site.data.skills %}
         <div class="skill-group">
           <h3 class="skill-category">{{ group.category }}</h3>
-          <ul class="skill-list">
+          <div class="tag-list">
             {% for skill in group.items %}
-            <li class="skill-item">
-              <span class="skill-name">{{ skill.name }}</span>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" style="width: {{ skill.level | times: 20 }}%"></div>
-              </div>
-            </li>
+            <span class="tag">{{ skill.name }}</span>
             {% endfor %}
-          </ul>
+          </div>
         </div>
         {% endfor %}
       </section>
@@ -97,44 +92,44 @@ layout: default
     </section>
 
     <!-- 학력 -->
-    <section class="main-section">
+    <section class="main-section main-section--plain">
       <h2 class="main-section-title"><i class="fa-solid fa-graduation-cap"></i>Education</h2>
       {% for edu in site.data.education %}
       <div class="timeline-item">
-        <div class="timeline-header">
-          <div>
+        <span class="timeline-date">{{ edu.period }}</span>
+        <div class="timeline-body">
+          <div class="timeline-header">
             <span class="item-title">{{ edu.school }}</span>
             <span class="item-sub"> — {{ edu.degree }}{% if edu.major and edu.major != "" %}, {{ edu.major }}{% endif %}</span>
           </div>
-          <span class="item-period">{{ edu.period }}</span>
+          {% if edu.note and edu.note != "" %}
+          <p class="item-note">{{ edu.note }}</p>
+          {% endif %}
         </div>
-        {% if edu.note and edu.note != "" %}
-        <p class="item-note">{{ edu.note }}</p>
-        {% endif %}
       </div>
       {% endfor %}
     </section>
 
     <!-- 경력 -->
-    <section class="main-section">
+    <section class="main-section main-section--plain">
       <h2 class="main-section-title"><i class="fa-solid fa-briefcase"></i>Experience</h2>
       {% for exp in site.data.experience %}
       <div class="timeline-item">
-        <div class="timeline-header">
-          <div>
+        <span class="timeline-date">{{ exp.period }}</span>
+        <div class="timeline-body">
+          <div class="timeline-header">
             <span class="item-title">{{ exp.company }}</span>
             <span class="item-sub"> · {{ exp.role }}</span>
           </div>
-          <span class="item-period">{{ exp.period }}</span>
+          {% if exp.company_desc %}
+          <p class="item-note item-company">{{ exp.company_desc }}</p>
+          {% endif %}
+          <ul class="item-desc">
+            {% for point in exp.description %}
+            <li>{{ point }}</li>
+            {% endfor %}
+          </ul>
         </div>
-        {% if exp.company_desc %}
-        <p class="item-note item-company">{{ exp.company_desc }}</p>
-        {% endif %}
-        <ul class="item-desc">
-          {% for point in exp.description %}
-          <li>{{ point }}</li>
-          {% endfor %}
-        </ul>
       </div>
       {% endfor %}
     </section>
