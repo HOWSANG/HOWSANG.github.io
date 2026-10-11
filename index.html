@@ -185,7 +185,9 @@ layout: default
           <p class="project-desc">{{ proj.description }}</p>
           {% endif %}
           <div class="project-footer">
+            {% if proj.period %}
             <span class="item-period">{{ proj.period }}</span>
+            {% endif %}
             <div class="project-tags">
               {% for tag in proj.tags %}
               <span class="tag tag-project">{{ tag }}</span>
