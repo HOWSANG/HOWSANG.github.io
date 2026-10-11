@@ -25,7 +25,7 @@ contact:
 
 # 언어
 languages:
-  - name: "한국어"
+  - name: "Korean"
     level: "Native"
   - name: "English"
     level: "Basic"       # Native / Fluent / Business / Basic
