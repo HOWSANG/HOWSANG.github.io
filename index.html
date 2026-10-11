@@ -170,7 +170,11 @@ layout: default
           <div class="project-output">
             <span class="output-label">산출물</span>
             <ul>
+              {% if proj.output.first %}
+              {% assign output_items = proj.output %}
+              {% else %}
               {% assign output_items = proj.output | remove: "\n" | split: "," %}
+              {% endif %}
               {% for item in output_items %}
               <li>{{ item | strip }}</li>
               {% endfor %}
