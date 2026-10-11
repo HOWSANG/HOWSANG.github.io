@@ -415,14 +415,15 @@ body {
 }
 
 .project-award {
-  align-self: flex-start;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: .4rem;
   font-size: 0.72rem;
   font-weight: 600;
   color: #b45309;
   background: #fef3c7;
   border-radius: 999px;
   padding: .15rem .6rem;
-  display: flex;
   align-items: center;
   gap: .3rem;
   i { font-size: .68rem; }

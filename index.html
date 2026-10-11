@@ -149,12 +149,9 @@ layout: default
       <div class="project-grid project-panel{% if forloop.first %} active{% endif %}" id="proj-{{ forloop.index }}" role="tabpanel">
         {% for proj in group.items %}
         <div class="project-card">
-          <p class="project-title">{{ proj.title }}</p>
+          <p class="project-title">{{ proj.title }}{% if proj.award %}<span class="project-award"><i class="fa-solid fa-trophy"></i>{{ proj.award }}</span>{% endif %}</p>
           {% if proj.affiliation %}
           <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
-          {% endif %}
-          {% if proj.award %}
-          <span class="project-award"><i class="fa-solid fa-trophy"></i>{{ proj.award }}</span>
           {% endif %}
           {% if proj.summary %}
           <p class="project-summary">{{ proj.summary }}</p>
