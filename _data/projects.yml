@@ -43,18 +43,20 @@
   output: >
     KB증권 최신 소유자 분석 API 제공, 데이터 정합성 검증 로직 구축으로 최신 소유자 데이터 신뢰도 확보
 
-- title: "AI바우처 / 마이데이터를 활용한 AI기반 부동산 개인 맞춤화 추천알고리즘 개발"
+- title: "AI 바우처"
   affiliation: "Bigtech Plus"
   period: "2022.05 ~ 2022.12"
   tags: ["Python", "SQL"]
+  summary: "마이데이터를 활용한 AI기반 부동산 개인 맞춤화 추천알고리즘 개발"
   tasks:
     - "KCB 제공 데이터 기반 대상 정의(개인신용정보, 거주지 이전/이후 정보)"
     - "매물 추천 알고리즘 정의"
 
-- title: "D-테스트베드 / 임대보증금 보호 및 거래 신뢰도 확보를 위한 부동산신용보고서"
+- title: "D-테스트베드"
   affiliation: "Bigtech Plus"
   period: "2021.09 ~ 2021.12"
   tags: ["Python", "SQL"]
+  summary: "임대보증금 보호 및 거래 신뢰도 확보를 위한 부동산신용보고서"
   award: "우수상 수상"
   tasks:
     - "임대인 신용에 따른 전세사기 위험도 검증"
