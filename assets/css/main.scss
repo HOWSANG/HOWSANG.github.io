@@ -226,6 +226,9 @@ body {
   box-shadow: 0 1px 6px rgba(0,0,0,.06);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
 
   &::before {
     content: '\201C';
@@ -236,6 +239,20 @@ body {
     font-family: Georgia, serif;
     line-height: 1;
   }
+}
+
+.intro-memoji {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #e0f2fe 0%, #f0f9ff 100%);
+  border: 2px solid $accent;
+  box-shadow: 0 0 0 4px $accent-glow;
+  object-fit: cover;
+  object-position: center 30%;
 }
 
 .intro-text {
@@ -611,4 +628,5 @@ body {
   .main { padding: 1.25rem; }
   .timeline-item { grid-template-columns: 1fr; gap: .35rem; }
   .tenure-chart { min-height: 140px; }
+  .intro-memoji { width: 56px; height: 56px; }
 }
