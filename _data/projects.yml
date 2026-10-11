@@ -46,6 +46,7 @@
 - title: "AI바우처 / 마이데이터를 활용한 AI기반 부동산 개인 맞춤화 추천알고리즘 개발"
   affiliation: "Bigtech Plus"
   period: "2022.05 ~ 2022.12"
+  tags: ["Python", "SQL"]
   tasks:
     - "KCB 제공 데이터 기반 대상 정의(개인신용정보, 거주지 이전/이후 정보)"
     - "매물 추천 알고리즘 정의"
@@ -53,6 +54,7 @@
 - title: "D-테스트베드 / 임대보증금 보호 및 거래 신뢰도 확보를 위한 부동산신용보고서"
   affiliation: "Bigtech Plus"
   period: "2021.09 ~ 2021.12"
+  tags: ["Python", "SQL"]
   award: "우수상 수상"
   tasks:
     - "임대인 신용에 따른 전세사기 위험도 검증"
