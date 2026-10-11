@@ -374,8 +374,7 @@ body {
   opacity: .75;
 }
 
-.project-panel { display: none; }
-.project-panel.active { display: grid; }
+.project-panel:not(.active) { display: none; }
 
 .project-grid {
   display: grid;
