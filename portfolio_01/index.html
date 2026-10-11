@@ -1,0 +1,528 @@
+---
+layout: default
+stylesheet: /assets/css/story.css
+permalink: /portfolio_01/
+---
+
+{% assign p = site.data.profile %}
+
+{% comment %} 숫자 화면용 통계 (빌드 시점 기준으로 계산) {% endcomment %}
+{% assign now_y = site.time | date: "%Y" | plus: 0 %}
+{% assign now_m = site.time | date: "%m" | plus: 0 %}
+{% assign total_months = 0 %}
+{% for exp in site.data.experience %}
+  {% assign parts = exp.period | split: "~" %}
+  {% assign s = parts[0] | strip | split: "." %}
+  {% assign e_raw = parts[1] | strip %}
+  {% if e_raw contains "." %}
+    {% assign e = e_raw | split: "." %}
+    {% assign ey = e[0] | plus: 0 %}{% assign em = e[1] | plus: 0 %}
+  {% else %}
+    {% assign ey = now_y %}{% assign em = now_m %}
+  {% endif %}
+  {% assign sy = s[0] | plus: 0 %}{% assign sm = s[1] | plus: 0 %}
+  {% assign months = ey | minus: sy | times: 12 | plus: em | minus: sm | plus: 1 %}
+  {% assign total_months = total_months | plus: months %}
+{% endfor %}
+{% assign career_years = total_months | divided_by: 12 %}
+{% assign award_projects = site.data.projects | where_exp: "item", "item.award" %}
+{% comment %} 회사 색 (experience.yml 순서: 최신 회사 → 과거 회사) {% endcomment %}
+{% assign company_colors = "#0369a1,#3fb68c,#e8875c,#9a8fe3" | split: "," %}
+
+<!-- ===== NAV ===== -->
+<nav class="story-nav" aria-label="섹션 이동">
+  <a class="story-nav-brand" href="#top">{{ p.name }}</a>
+  <div class="story-nav-links">
+    <a href="#career">Career</a>
+    <a href="#projects">Projects</a>
+    <a href="#about">About</a>
+    <a class="story-nav-cta" href="#contact">Contact</a>
+  </div>
+</nav>
+
+<main class="story">
+
+  <!-- ① HERO -->
+  <header class="hero" id="top">
+    <div class="hero-sticky">
+      <div class="hero-inner">
+        {% if p.photo %}
+        <img class="hero-photo" src="{{ p.photo | relative_url }}" alt="{{ p.name }} 프로필 사진" width="112" height="112" />
+        {% endif %}
+        <p class="hero-eyebrow">{{ p.name }} · {{ p.name_ko }}</p>
+        <h1 class="hero-title"><span class="gradient-text">{{ p.tagline }}</span></h1>
+        <p class="hero-role">{{ p.title }}</p>
+      </div>
+      <div class="hero-cue" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></div>
+    </div>
+  </header>
+
+  <!-- ② STATEMENT -->
+  <section class="statement" aria-label="소개">
+    <div class="statement-sticky">
+      <div class="story-wrap statement-inner">
+        <img class="statement-memoji" src="{{ 'assets/images/memoji.png' | relative_url }}" alt="손을 흔들며 인사하는 {{ p.name }}의 미모지" width="88" height="88" />
+        <p class="statement-text">
+          {%- comment -%} "데이터 사이언티스트"는 줄바꿈되지 않도록 붙어 있는 공백(NBSP)으로 묶음 {%- endcomment -%}
+          {%- assign lines = p.intro | strip | replace: "데이터 사이언티스트", "데이터 사이언티스트" | newline_to_br | split: "<br />" -%}
+          {%- for line in lines -%}
+            {%- assign words = line | strip | split: " " -%}
+            <span class="line">{%- for w in words %}<span class="w">{{ w }}</span>{% unless forloop.last %}{{ " " }}{% endunless %}{% endfor -%}</span>
+            {%- unless forloop.last %}<br />{% endunless -%}
+          {%- endfor -%}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ STATS -->
+  <section class="stats" aria-label="숫자로 보는 커리어">
+    <div class="story-wrap">
+      <p class="story-eyebrow reveal">By the numbers</p>
+      <h2 class="story-heading reveal">숫자로 보는 커리어</h2>
+      <div class="stat-grid">
+        <div class="stat reveal" style="--d: 0">
+          <p class="stat-value"><span class="count" data-to="{{ career_years }}">{{ career_years }}</span><small>년+</small></p>
+          <p class="stat-label">데이터 분야 경력</p>
+        </div>
+        <div class="stat reveal" style="--d: 1">
+          <p class="stat-value"><span class="count" data-to="{{ site.data.projects.size }}">{{ site.data.projects.size }}</span><small>개</small></p>
+          <p class="stat-label">수행한 프로젝트</p>
+        </div>
+        <div class="stat reveal" style="--d: 2">
+          <p class="stat-value"><span class="count" data-to="{{ site.data.experience.size }}">{{ site.data.experience.size }}</span><small>곳</small></p>
+          <p class="stat-label">함께한 회사</p>
+        </div>
+        <div class="stat reveal" style="--d: 3">
+          <p class="stat-value"><span class="count" data-to="{{ award_projects.size }}">{{ award_projects.size }}</span><small>회</small></p>
+          <p class="stat-label">프로젝트 수상</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ CAREER (스크롤에 따라 회사가 하나씩 켜짐) -->
+  <section class="career" id="career" style="--steps: {{ site.data.experience.size }}">
+    <div class="career-sticky">
+      <div class="story-wrap">
+        <p class="story-eyebrow">Career</p>
+        <h2 class="story-heading">커리어 여정</h2>
+        <div class="ribbon" aria-hidden="true">
+          <div class="ribbon-track">
+            {% for exp in site.data.experience reversed %}
+            {% assign ci = forloop.rindex0 %}
+            <div class="ribbon-seg" data-period="{{ exp.period }}" style="--c: {{ company_colors[ci] }}"></div>
+            {% endfor %}
+          </div>
+          <div class="ribbon-axis"></div>
+        </div>
+        <ol class="career-steps">
+          {% for exp in site.data.experience reversed %}
+          {% assign ci = forloop.rindex0 %}
+          <li class="career-step{% if forloop.first %} is-active{% endif %}" style="--c: {{ company_colors[ci] }}">
+            <p class="career-period">{{ exp.period }}</p>
+            <h3 class="career-company">{{ exp.company }}<span> · {{ exp.role }}</span></h3>
+            {% if exp.company_desc %}<p class="career-desc">{{ exp.company_desc }}</p>{% endif %}
+            <ul class="career-points">
+              {% for point in exp.description %}<li>{{ point }}</li>{% endfor %}
+            </ul>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ FEATURED: 회사별 대표 프로젝트 (수상 프로젝트 우선, 없으면 최신 프로젝트) -->
+  <section class="featured" aria-label="회사별 대표 프로젝트">
+    <div class="story-wrap">
+      <p class="story-eyebrow reveal">Highlights</p>
+      <h2 class="story-heading reveal">회사별 대표 프로젝트</h2>
+    </div>
+    {% for exp in site.data.experience %}
+    {% assign cps = site.data.projects | where: "affiliation", exp.company %}
+    {% assign awarded = cps | where_exp: "item", "item.award" %}
+    {% if awarded.size > 0 %}{% assign fp = awarded.first %}{% else %}{% assign fp = cps.first %}{% endif %}
+    {% if fp %}
+    {% assign result = "" %}
+    {% if fp.output %}
+      {% if fp.output.first %}{% assign result = fp.output.first %}{% else %}{% assign result = fp.output | remove: "\n" | split: "," | first | strip %}{% endif %}
+    {% endif %}
+    <article class="feature" style="--c: {{ company_colors[forloop.index0] }}">
+      <div class="story-wrap feature-inner">
+        <p class="feature-company reveal"><span class="feature-dot"></span>{{ exp.company }}{% if fp.period %} · {{ fp.period }}{% endif %}</p>
+        <h3 class="feature-title reveal" style="--d: 1">{{ fp.title }}{% if fp.award %} <span class="project-award"><i class="fa-solid fa-trophy"></i>{{ fp.award }}</span>{% endif %}</h3>
+        {% if fp.summary %}<p class="feature-summary reveal" style="--d: 2">{{ fp.summary }}</p>{% endif %}
+        {% if result != "" %}
+        <p class="feature-result reveal" style="--d: 3"><span>핵심 성과</span>{{ result }}</p>
+        {% endif %}
+        <div class="feature-tags reveal" style="--d: 4">
+          {% for tag in fp.tags %}<span class="tag tag-project">{{ tag }}</span>{% endfor %}
+        </div>
+      </div>
+    </article>
+    {% endif %}
+    {% endfor %}
+  </section>
+
+  <!-- ⑥ ALL PROJECTS -->
+  <section class="projects-section" id="projects">
+    <div class="story-wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="story-eyebrow">Projects</p>
+          <h2 class="story-heading">모든 프로젝트</h2>
+        </div>
+        <p class="section-hint">카드의 <i class="fa-solid fa-chevron-down" aria-hidden="true"></i> 화살표를 누르면 담당업무와 산출물을 확인할 수 있습니다.</p>
+      </div>
+      <div class="skill-filter reveal" role="group" aria-label="기술로 프로젝트 찾기">
+        {% for group in site.data.skills %}{% for skill in group.items %}
+        <button type="button" class="skill-chip skill-tag" data-skill="{{ skill.name }}" aria-pressed="false">{{ skill.name }}</button>
+        {% endfor %}{% endfor %}
+      </div>
+        {% assign project_groups = site.data.projects | group_by: "affiliation" %}
+        {% assign default_tab = project_groups.first.name %}
+        <div class="project-tabs" role="tablist">
+          <button type="button" class="project-tab" role="tab" aria-selected="false" data-filter="all">All<span class="project-tab-count">{{ site.data.projects.size }}</span></button>
+          {% for group in project_groups %}
+          <button type="button" class="project-tab{% if forloop.first %} active{% endif %}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-filter="{{ group.name }}">{{ group.name }}<span class="project-tab-count">{{ group.size }}</span></button>
+          {% endfor %}
+        </div>
+        <div class="project-grid" role="tabpanel">
+          {% for proj in site.data.projects %}
+          {% assign has_details = false %}
+          {% if proj.tasks or proj.output or proj.description %}{% assign has_details = true %}{% endif %}
+          <div class="project-card{% if has_details %} is-collapsible{% endif %}" data-affiliation="{{ proj.affiliation }}" data-tags="{{ proj.tags | join: '|' }}"{% unless proj.affiliation == default_tab %} hidden{% endunless %}{% if has_details %} tabindex="0" role="button" aria-expanded="false" aria-controls="project-details-{{ forloop.index }}"{% endif %}>
+            <p class="project-title">{{ proj.title }}{% if proj.award %}<span class="project-award"><i class="fa-solid fa-trophy"></i>{{ proj.award }}</span>{% endif %}</p>
+            {% if proj.affiliation %}
+            <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
+            {% endif %}
+            {% if proj.summary %}
+            <p class="project-summary">{{ proj.summary }}</p>
+            {% endif %}
+            {% if has_details %}
+            <div class="project-details" id="project-details-{{ forloop.index }}">
+              <div class="project-details-inner">
+                {% if proj.tasks %}
+                <div class="project-output">
+                  <span class="output-label">담당업무</span>
+                  <ul>
+                    {% for task in proj.tasks %}
+                    <li>{{ task }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endif %}
+                {% if proj.output %}
+                <div class="project-output">
+                  <span class="output-label">산출물</span>
+                  <ul>
+                    {% if proj.output.first %}
+                    {% assign output_items = proj.output %}
+                    {% else %}
+                    {% assign output_items = proj.output | remove: "\n" | split: "," %}
+                    {% endif %}
+                    {% for item in output_items %}
+                    <li>{{ item | strip }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endif %}
+                {% if proj.description %}
+                <p class="project-desc">{{ proj.description }}</p>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+            <div class="project-footer">
+              {% if proj.period %}
+              <span class="item-period">{{ proj.period }}</span>
+              {% endif %}
+              <div class="project-tags">
+                {% for tag in proj.tags %}
+                <span class="tag tag-project">{{ tag }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="project-links">
+              {% if proj.github and proj.github != "" %}
+              <a href="{{ proj.github }}" target="_blank"><i class="fa-brands fa-github"></i>GitHub</a>
+              {% endif %}
+              {% if proj.demo and proj.demo != "" %}
+              <a href="{{ proj.demo }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i>Demo</a>
+              {% endif %}
+            </div>
+            {% if has_details %}
+            <i class="fa-solid fa-chevron-down project-toggle-icon" aria-hidden="true"></i>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+    </div>
+  </section>
+
+  <!-- ⑦ ABOUT -->
+  <section class="about" id="about">
+    <div class="story-wrap">
+      <p class="story-eyebrow reveal">About</p>
+      <h2 class="story-heading reveal">더 알아보기</h2>
+      <div class="about-grid">
+        <div class="about-col reveal" style="--d: 0">
+          <h3 class="about-title">Education</h3>
+          {% for edu in site.data.education %}
+          <div class="timeline-item">
+            <span class="timeline-date">{{ edu.period }}</span>
+            <div class="timeline-body">
+              <div class="timeline-header">
+                <span class="item-title">{{ edu.school }}</span>
+                <span class="item-sub"> — {{ edu.degree }}{% if edu.major and edu.major != "" %}, {{ edu.major }}{% endif %}</span>
+              </div>
+              {% if edu.note and edu.note != "" %}
+              <p class="item-note">{{ edu.note }}</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="about-col reveal" style="--d: 1">
+          <h3 class="about-title">Skills</h3>
+          {% for group in site.data.skills %}
+          <div class="about-skill-group">
+            <p class="about-label">{{ group.category }}</p>
+            <div class="tag-list">
+              {% for skill in group.items %}<span class="about-chip">{{ skill.name }}</span>{% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="about-col reveal" style="--d: 2">
+          <h3 class="about-title">Interests</h3>
+          <div class="tag-list">
+            {% for item in site.data.interests %}<span class="about-chip">{{ item }}</span>{% endfor %}
+          </div>
+          <h3 class="about-title about-title--spaced">Languages</h3>
+          <ul class="about-langs">
+            {% for lang in p.languages %}<li><span>{{ lang.name }}</span><span>{{ lang.level }}</span></li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ CONTACT -->
+  <section class="finale" id="contact">
+    <div class="story-wrap finale-inner">
+      <p class="story-eyebrow reveal">Contact</p>
+      <h2 class="finale-title reveal" style="--d: 1"><span class="gradient-text">함께 물음표를 풀어 볼까요?</span></h2>
+      <div class="finale-actions reveal" style="--d: 2">
+        {% if p.contact.email %}<a class="btn btn-primary" href="mailto:{{ p.contact.email }}"><i class="fa-solid fa-envelope"></i>{{ p.contact.email }}</a>{% endif %}
+        {% if p.contact.github %}<a class="btn btn-ghost" href="{{ p.contact.github }}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>GitHub</a>{% endif %}
+        {% if p.contact.linkedin %}<a class="btn btn-ghost" href="{{ p.contact.linkedin }}" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i>LinkedIn</a>{% endif %}
+      </div>
+      {% if p.contact.location %}<p class="finale-location reveal" style="--d: 3"><i class="fa-solid fa-location-dot"></i>{{ p.contact.location }}</p>{% endif %}
+      <a class="finale-alt reveal" style="--d: 4" href="{{ '/' | relative_url }}">한 페이지 요약 버전으로 보기<i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <footer class="story-footer">© {{ site.time | date: "%Y" }} {{ p.name }} · {{ p.name_ko }}</footer>
+  </section>
+
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (motion) root.classList.add('motion');
+
+    // 나타나기(reveal) 효과
+    var reveals = document.querySelectorAll('.reveal');
+    var counts = document.querySelectorAll('.count');
+    function countUp(el) {
+      var to = +el.dataset.to, start = null;
+      function step(t) {
+        if (!start) start = t;
+        var k = Math.min(1, (t - start) / 1200);
+        el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      }
+      el.textContent = '0';
+      requestAnimationFrame(step);
+    }
+    if (motion && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('is-visible');
+          en.target.querySelectorAll('.count').forEach(countUp);
+          io.unobserve(en.target);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      reveals.forEach(function (el) { io.observe(el); });
+    } else {
+      reveals.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+
+    // 커리어 리본: 기간에 맞게 막대 위치 계산
+    var now = new Date();
+    function parseMonth(str) {
+      var m = str.trim().match(/^(\d{4})\.(\d{1,2})$/);
+      return m ? +m[1] * 12 + (+m[2] - 1) : now.getFullYear() * 12 + now.getMonth();
+    }
+    var segs = Array.prototype.slice.call(document.querySelectorAll('.ribbon-seg'));
+    var spans = segs.map(function (seg) {
+      var parts = seg.dataset.period.split('~');
+      return { s: parseMonth(parts[0]), e: parseMonth(parts[1]) + 1 };
+    });
+    var minM = Math.min.apply(null, spans.map(function (x) { return x.s; })) - 3;
+    var maxM = Math.max.apply(null, spans.map(function (x) { return x.e; })) + 3;
+    segs.forEach(function (seg, i) {
+      var e = Math.min(spans[i].e, spans[i + 1] ? spans[i + 1].s : spans[i].e);
+      seg.style.left = ((spans[i].s - minM) / (maxM - minM) * 100) + '%';
+      seg.style.width = ((e - spans[i].s) / (maxM - minM) * 100) + '%';
+    });
+    var axis = document.querySelector('.ribbon-axis');
+    for (var y = Math.ceil(minM / 12); y * 12 <= maxM; y++) {
+      var tick = document.createElement('span');
+      tick.textContent = y;
+      tick.style.left = ((y * 12 - minM) / (maxM - minM) * 100) + '%';
+      axis.appendChild(tick);
+    }
+
+    // 스크롤 진행도에 따른 연출 (히어로 축소, 문장 하이라이트, 커리어 단계)
+    var hero = document.querySelector('.hero');
+    var statement = document.querySelector('.statement');
+    var words = document.querySelectorAll('.statement .w');
+    var career = document.querySelector('.career');
+    var steps = document.querySelectorAll('.career-step');
+    function progress(el) {
+      var r = el.getBoundingClientRect(), total = r.height - window.innerHeight;
+      if (total <= 0) return r.top < 0 ? 1 : 0;
+      return Math.min(1, Math.max(0, -r.top / total));
+    }
+    function setStep(active) {
+      steps.forEach(function (st, i) { st.classList.toggle('is-active', i === active); });
+      segs.forEach(function (seg, i) {
+        seg.classList.toggle('is-active', i === active);
+        seg.classList.toggle('is-past', i < active);
+      });
+    }
+    // 상단 메뉴: 어두운 섹션(히어로·마무리) 위에서는 어둡게, 나머지에서는 밝게
+    var nav = document.querySelector('.story-nav');
+    var finale = document.querySelector('.finale');
+    function updateNav() {
+      var h = nav.offsetHeight;
+      var overDark = hero.getBoundingClientRect().bottom > h || finale.getBoundingClientRect().top < h;
+      nav.classList.toggle('is-light', !overDark);
+    }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      hero.style.setProperty('--p', progress(hero).toFixed(3));
+      var lit = Math.floor(progress(statement) * 1.25 * words.length);
+      words.forEach(function (w, i) { w.classList.toggle('lit', i < lit); });
+      setStep(Math.min(steps.length - 1, Math.floor(progress(career) * steps.length)));
+    }
+    if (motion) {
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    } else {
+      segs.forEach(function (seg) { seg.classList.add('is-past'); });
+    }
+  })();
+</script>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll('.project-tab');
+    var cards = document.querySelectorAll('.project-card');
+    var grid = document.querySelector('.project-grid');
+    var allCards = Array.prototype.slice.call(cards);
+    var wide = window.matchMedia('(min-width: 781px)');
+
+    // 카드를 왼쪽·오른쪽 독립된 열에 번갈아 배치해서, 한쪽 카드를 펼쳐도 다른 열은 움직이지 않게 함
+    function layout() {
+      var count = wide.matches ? 2 : 1, cols = [];
+      grid.textContent = '';
+      for (var i = 0; i < count; i++) {
+        var col = document.createElement('div');
+        col.className = 'project-col';
+        grid.appendChild(col);
+        cols.push(col);
+      }
+      allCards.filter(function (c) { return !c.hidden; })
+        .forEach(function (c, i) { cols[i % count].appendChild(c); });
+      allCards.filter(function (c) { return c.hidden; })
+        .forEach(function (c) { cols[0].appendChild(c); });
+    }
+    grid.classList.add('is-masonry');
+    wide.addEventListener('change', layout);
+    var skillTags = document.querySelectorAll('.skill-tag');
+    var activeSkill = null;
+
+    function selectTab(filter) {
+      tabs.forEach(function (tab) {
+        var on = tab.dataset.filter === filter;
+        tab.classList.toggle('active', on);
+        tab.setAttribute('aria-selected', on);
+      });
+      cards.forEach(function (card) {
+        card.hidden = filter !== 'all' && card.dataset.affiliation !== filter;
+      });
+      layout();
+    }
+
+    function applySkill() {
+      skillTags.forEach(function (tag) {
+        var on = tag.dataset.skill === activeSkill;
+        tag.classList.toggle('active', on);
+        tag.setAttribute('aria-pressed', on);
+      });
+      cards.forEach(function (card) {
+        var tags = card.dataset.tags ? card.dataset.tags.split('|') : [];
+        card.classList.toggle('is-dimmed', activeSkill !== null && tags.indexOf(activeSkill) === -1);
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () { selectTab(tab.dataset.filter); });
+    });
+    layout();
+
+    // 프로젝트에 쓰이지 않은 기술은 필터에서 숨김 (전체 목록은 About에 있음)
+    skillTags.forEach(function (tag) {
+      var used = Array.prototype.some.call(cards, function (card) {
+        return card.dataset.tags.split('|').indexOf(tag.dataset.skill) !== -1;
+      });
+      if (!used) { tag.hidden = true; return; }
+      tag.addEventListener('click', function () {
+        activeSkill = activeSkill === tag.dataset.skill ? null : tag.dataset.skill;
+        if (activeSkill !== null) selectTab('all');
+        applySkill();
+      });
+    });
+
+    function toggleCard(card) {
+      var open = card.getAttribute('aria-expanded') !== 'true';
+      card.setAttribute('aria-expanded', open);
+    }
+
+    document.querySelectorAll('.project-card.is-collapsible').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        toggleCard(card);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.target !== card) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard(card);
+        }
+      });
+    });
+  })();
+</script>
