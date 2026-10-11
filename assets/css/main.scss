@@ -256,14 +256,6 @@ body {
   &:nth-child(2) { border-top-color: #38bdf8; }
   &:nth-child(3) { border-top-color: #818cf8; }
   &:nth-child(4) { border-top-color: #34d399; }
-
-  &.main-section--plain {
-    background: none;
-    border-radius: 0;
-    box-shadow: none;
-    border-top: none;
-    padding: .5rem .25rem;
-  }
 }
 
 .main-section-title {
@@ -279,19 +271,70 @@ body {
 }
 
 /* Tenure chart */
-.tenure-chart {
-  margin-bottom: .5rem;
-  min-height: 170px;
+.tenure-panel {
+  background: #f8fafc;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: .85rem 1rem .25rem;
+  margin-bottom: 1.75rem;
 }
+
+.tenure-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: $muted;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  i { color: $accent; }
+}
+
+.tenure-chart { min-height: 170px; }
 
 /* Timeline */
 .timeline-item {
+  position: relative;
   display: grid;
   grid-template-columns: 9rem 1fr;
   gap: 1.5rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid $border;
-  &:last-child { border-bottom: none; }
+  margin-left: .35rem;
+  padding: 0 0 1.6rem 1.5rem;
+  border-left: 2px solid $border;
+
+  &:last-child {
+    padding-bottom: .25rem;
+    border-left-color: transparent;
+    // 마지막 항목은 점까지만 선을 이어 줌
+    &::after {
+      content: '';
+      position: absolute;
+      left: -2px;
+      top: 0;
+      height: .55rem;
+      border-left: 2px solid $border;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: .2rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: $card-bg;
+    border: 2px solid $accent;
+    z-index: 1;
+  }
+
+  &.is-current::before {
+    background: $accent-dim;
+    border-color: $accent-dim;
+    box-shadow: 0 0 0 4px $accent-glow;
+  }
 }
 
 .timeline-date {
@@ -301,6 +344,8 @@ body {
   letter-spacing: .02em;
   padding-top: .1rem;
   white-space: nowrap;
+
+  .is-current & { color: $accent-dim; font-weight: 600; }
 }
 
 .timeline-header {

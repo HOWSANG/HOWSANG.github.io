@@ -92,7 +92,7 @@ layout: default
     </section>
 
     <!-- 학력 -->
-    <section class="main-section main-section--plain">
+    <section class="main-section">
       <h2 class="main-section-title"><i class="fa-solid fa-graduation-cap"></i>Education</h2>
       {% for edu in site.data.education %}
       <div class="timeline-item">
@@ -111,11 +111,14 @@ layout: default
     </section>
 
     <!-- 경력 -->
-    <section class="main-section main-section--plain">
+    <section class="main-section">
       <h2 class="main-section-title"><i class="fa-solid fa-briefcase"></i>Experience</h2>
-      <div id="tenure-chart" class="tenure-chart" role="img" aria-label="회사별 재직 기간을 한 줄로 이은 커리어 리본"></div>
+      <div class="tenure-panel">
+        <p class="tenure-label"><i class="fa-solid fa-chart-gantt"></i>Career Timeline</p>
+        <div id="tenure-chart" class="tenure-chart" role="img" aria-label="회사별 재직 기간을 한 줄로 이은 커리어 리본"></div>
+      </div>
       {% for exp in site.data.experience %}
-      <div class="timeline-item">
+      <div class="timeline-item{% if exp.period contains '재직중' %} is-current{% endif %}">
         <span class="timeline-date">{{ exp.period }}</span>
         <div class="timeline-body">
           <div class="timeline-header">
@@ -255,7 +258,7 @@ layout: default
       if (next && r.end > next.start) r.end = next.start;
     });
 
-    var ink = '#1e293b', muted = '#64748b', surface = '#f0f4f8', bar = '#0284c7';
+    var ink = '#1e293b', muted = '#64748b', surface = '#f8fafc', bar = '#0284c7';
     var first = rows[0].start, last = rows[rows.length - 1].end;
     var padMs = 1000 * 60 * 60 * 24 * 120;
 
@@ -277,13 +280,32 @@ layout: default
       hovertemplate: '현재<extra></extra>'
     };
 
-    var labels = rows.map(function (r, i) {
-      var above = i % 2 === 0;
+    var narrow = el.clientWidth < 520;
+    var fontSize = narrow ? 10 : 11.5;
+    var rangeStart = first.getTime() - padMs, rangeEnd = last.getTime() + padMs;
+    var pxPerMs = (el.clientWidth - 24) / (rangeEnd - rangeStart);
+    function textWidth(str) {
+      return str.split('').reduce(function (w, ch) {
+        return w + (ch.charCodeAt(0) > 127 ? fontSize : fontSize * 0.62);
+      }, 0);
+    }
+
+    // 라벨이 겹치지 않도록 위·아래 중 비어 있는 쪽에 배치
+    var laneEnd = { above: -Infinity, below: -Infinity };
+    var labels = rows.map(function (r) {
+      var mid = (r.start.getTime() + r.end.getTime()) / 2;
+      var cx = (mid - rangeStart) * pxPerMs;
+      var half = Math.max(textWidth(r.company) * 1.08, textWidth(r.duration)) / 2 + 6;
+      var lane = cx - half >= laneEnd.above ? 'above'
+        : cx - half >= laneEnd.below ? 'below'
+        : (laneEnd.above <= laneEnd.below ? 'above' : 'below');
+      laneEnd[lane] = cx + half;
+      var above = lane === 'above';
       return {
-        x: new Date((r.start.getTime() + r.end.getTime()) / 2).toISOString(), y: 0,
+        x: new Date(mid).toISOString(), y: 0,
         yshift: above ? 16 : -16, yanchor: above ? 'bottom' : 'top',
         text: '<b>' + r.company + '</b><br><span style="color:' + muted + '">' + r.duration + '</span>',
-        showarrow: false, align: 'center', font: { size: 11.5, color: ink }
+        showarrow: false, align: 'center', font: { size: fontSize, color: ink }
       };
     });
 
@@ -294,7 +316,7 @@ layout: default
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: { family: 'Inter, "Noto Sans KR", sans-serif', size: 12, color: ink },
       xaxis: {
-        type: 'date', range: [new Date(first - padMs), new Date(last.getTime() + padMs)],
+        type: 'date', range: [new Date(rangeStart), new Date(rangeEnd)],
         dtick: 'M12', tickformat: '%Y', showgrid: false, zeroline: false, showline: false,
         ticks: '', tickfont: { color: muted, size: 11 }, fixedrange: true
       },
