@@ -101,6 +101,31 @@ permalink: /portfolio_01/
     </div>
   </section>
 
+  <!-- ③-1 WHAT I DO BEST -->
+  <section class="strengths" id="strengths" aria-label="What I do best">
+    <div class="story-wrap">
+      <p class="story-eyebrow reveal">What I do best</p>
+      <h2 class="story-heading strengths-heading reveal"><span class="gradient-text">구조를 설계하고, 보이게 만들고, 움직이게 합니다.</span></h2>
+      <div class="strength-grid">
+        {% for st in site.data.strengths %}
+        <article class="strength-card reveal" style="--d: {{ forloop.index0 }}">
+          <div class="strength-top">
+            <span class="strength-num">0{{ forloop.index }}</span>
+            <i class="fa-solid {{ st.icon }}" aria-hidden="true"></i>
+          </div>
+          <h3 class="strength-title">{{ st.title }}</h3>
+          <p class="strength-en">{{ st.en }}</p>
+          <p class="strength-message">{{ st.message }}</p>
+          <ul class="strength-proofs">
+            {% for proof in st.proofs %}<li>{{ proof }}</li>{% endfor %}
+          </ul>
+          <button type="button" class="strength-link" data-strength="{{ st.id }}">관련 프로젝트 {{ st.projects.size }}개 보기<i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
   <!-- ④ CAREER (스크롤에 따라 회사가 하나씩 켜짐) -->
   <section class="career" id="career" style="--steps: {{ site.data.experience.size }}">
     <div class="career-sticky">
@@ -175,9 +200,13 @@ permalink: /portfolio_01/
         </div>
         <p class="section-hint">카드의 <i class="fa-solid fa-chevron-down" aria-hidden="true"></i> 화살표를 누르면 담당업무와 산출물을 확인할 수 있습니다.</p>
       </div>
-      <div class="skill-filter reveal" role="group" aria-label="기술로 프로젝트 찾기">
+      <div class="skill-filter reveal" role="group" aria-label="강점·기술로 프로젝트 찾기">
+        {% for st in site.data.strengths %}
+        <button type="button" class="skill-chip strength-chip filter-chip" data-key="strengths" data-value="{{ st.id }}" aria-pressed="false"><i class="fa-solid {{ st.icon }}" aria-hidden="true"></i>{{ st.title }}</button>
+        {% endfor %}
+        <span class="filter-divider" aria-hidden="true"></span>
         {% for group in site.data.skills %}{% for skill in group.items %}
-        <button type="button" class="skill-chip skill-tag" data-skill="{{ skill.name }}" aria-pressed="false">{{ skill.name }}</button>
+        <button type="button" class="skill-chip filter-chip" data-key="tags" data-value="{{ skill.name }}" aria-pressed="false">{{ skill.name }}</button>
         {% endfor %}{% endfor %}
       </div>
         {% assign project_groups = site.data.projects | group_by: "affiliation" %}
@@ -192,7 +221,9 @@ permalink: /portfolio_01/
           {% for proj in site.data.projects %}
           {% assign has_details = false %}
           {% if proj.tasks or proj.output or proj.description %}{% assign has_details = true %}{% endif %}
-          <div class="project-card{% if has_details %} is-collapsible{% endif %}" data-affiliation="{{ proj.affiliation }}" data-tags="{{ proj.tags | join: '|' }}"{% unless proj.affiliation == default_tab %} hidden{% endunless %}{% if has_details %} tabindex="0" role="button" aria-expanded="false" aria-controls="project-details-{{ forloop.index }}"{% endif %}>
+          {% assign strength_ids = "" %}
+          {% for st in site.data.strengths %}{% if st.projects contains proj.title %}{% assign strength_ids = strength_ids | append: st.id | append: "|" %}{% endif %}{% endfor %}
+          <div class="project-card{% if has_details %} is-collapsible{% endif %}" data-affiliation="{{ proj.affiliation }}" data-tags="{{ proj.tags | join: '|' }}" data-strengths="{{ strength_ids }}"{% unless proj.affiliation == default_tab %} hidden{% endunless %}{% if has_details %} tabindex="0" role="button" aria-expanded="false" aria-controls="project-details-{{ forloop.index }}"{% endif %}>
             <p class="project-title">{{ proj.title }}{% if proj.award %}<span class="project-award"><i class="fa-solid fa-trophy"></i>{{ proj.award }}</span>{% endif %}</p>
             {% if proj.affiliation %}
             <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
@@ -407,10 +438,13 @@ permalink: /portfolio_01/
     }
     // 상단 메뉴: 어두운 섹션(히어로·마무리) 위에서는 어둡게, 나머지에서는 밝게
     var nav = document.querySelector('.story-nav');
-    var finale = document.querySelector('.finale');
+    var darkSections = document.querySelectorAll('.hero, .strengths, .finale');
     function updateNav() {
       var h = nav.offsetHeight;
-      var overDark = hero.getBoundingClientRect().bottom > h || finale.getBoundingClientRect().top < h;
+      var overDark = Array.prototype.some.call(darkSections, function (sec) {
+        var r = sec.getBoundingClientRect();
+        return r.top < h && r.bottom > h;
+      });
       nav.classList.toggle('is-light', !overDark);
     }
     window.addEventListener('scroll', updateNav, { passive: true });
@@ -461,8 +495,8 @@ permalink: /portfolio_01/
     }
     grid.classList.add('is-masonry');
     wide.addEventListener('change', layout);
-    var skillTags = document.querySelectorAll('.skill-tag');
-    var activeSkill = null;
+    var chips = document.querySelectorAll('.filter-chip');
+    var active = null; // { key: 'tags' | 'strengths', value }
 
     function selectTab(filter) {
       tabs.forEach(function (tab) {
@@ -476,16 +510,23 @@ permalink: /portfolio_01/
       layout();
     }
 
-    function applySkill() {
-      skillTags.forEach(function (tag) {
-        var on = tag.dataset.skill === activeSkill;
-        tag.classList.toggle('active', on);
-        tag.setAttribute('aria-pressed', on);
+    function applyFilter() {
+      chips.forEach(function (chip) {
+        var on = !!active && chip.dataset.key === active.key && chip.dataset.value === active.value;
+        chip.classList.toggle('active', on);
+        chip.setAttribute('aria-pressed', on);
       });
       cards.forEach(function (card) {
-        var tags = card.dataset.tags ? card.dataset.tags.split('|') : [];
-        card.classList.toggle('is-dimmed', activeSkill !== null && tags.indexOf(activeSkill) === -1);
+        var list = active ? (card.dataset[active.key] || '').split('|') : [];
+        card.classList.toggle('is-dimmed', !!active && list.indexOf(active.value) === -1);
       });
+    }
+
+    function setFilter(key, value, keepOn) {
+      var same = active && active.key === key && active.value === value;
+      active = same && !keepOn ? null : { key: key, value: value };
+      if (active) selectTab('all');
+      applyFilter();
     }
 
     tabs.forEach(function (tab) {
@@ -494,15 +535,19 @@ permalink: /portfolio_01/
     layout();
 
     // 프로젝트에 쓰이지 않은 기술은 필터에서 숨김 (전체 목록은 About에 있음)
-    skillTags.forEach(function (tag) {
+    chips.forEach(function (chip) {
       var used = Array.prototype.some.call(cards, function (card) {
-        return card.dataset.tags.split('|').indexOf(tag.dataset.skill) !== -1;
+        return (card.dataset[chip.dataset.key] || '').split('|').indexOf(chip.dataset.value) !== -1;
       });
-      if (!used) { tag.hidden = true; return; }
-      tag.addEventListener('click', function () {
-        activeSkill = activeSkill === tag.dataset.skill ? null : tag.dataset.skill;
-        if (activeSkill !== null) selectTab('all');
-        applySkill();
+      if (!used) { chip.hidden = true; return; }
+      chip.addEventListener('click', function () { setFilter(chip.dataset.key, chip.dataset.value); });
+    });
+
+    // What I do best 카드 → 해당 강점으로 프로젝트를 걸러서 보여 줌
+    document.querySelectorAll('.strength-link').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setFilter('strengths', btn.dataset.strength, true);
+        document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
       });
     });
 
