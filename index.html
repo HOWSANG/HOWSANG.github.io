@@ -53,7 +53,7 @@ layout: default
           <h3 class="skill-category">{{ group.category }}</h3>
           <div class="tag-list">
             {% for skill in group.items %}
-            <span class="tag">{{ skill.name }}</span>
+            <button type="button" class="tag skill-tag" data-skill="{{ skill.name }}" aria-pressed="false">{{ skill.name }}</button>
             {% endfor %}
           </div>
         </div>
@@ -135,18 +135,21 @@ layout: default
     </section>
 
     <!-- 프로젝트 -->
-    <section class="main-section">
+    <section class="main-section" id="projects">
       <h2 class="main-section-title"><i class="fa-solid fa-code"></i>Projects</h2>
       {% assign project_groups = site.data.projects | group_by: "affiliation" %}
+      {% assign default_tab = project_groups.first.name %}
       <div class="project-tabs" role="tablist">
+        <button type="button" class="project-tab" role="tab" aria-selected="false" data-filter="all">All<span class="project-tab-count">{{ site.data.projects.size }}</span></button>
         {% for group in project_groups %}
-        <button type="button" class="project-tab{% if forloop.first %} active{% endif %}" role="tab" data-tab="proj-{{ forloop.index }}">{{ group.name }}<span class="project-tab-count">{{ group.size }}</span></button>
+        <button type="button" class="project-tab{% if forloop.first %} active{% endif %}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-filter="{{ group.name }}">{{ group.name }}<span class="project-tab-count">{{ group.size }}</span></button>
         {% endfor %}
       </div>
-      {% for group in project_groups %}
-      <div class="project-grid project-panel{% if forloop.first %} active{% endif %}" id="proj-{{ forloop.index }}" role="tabpanel">
-        {% for proj in group.items %}
-        <div class="project-card">
+      <div class="project-grid" role="tabpanel">
+        {% for proj in site.data.projects %}
+        {% assign has_details = false %}
+        {% if proj.tasks or proj.output or proj.description %}{% assign has_details = true %}{% endif %}
+        <div class="project-card{% if has_details %} is-collapsible{% endif %}" data-affiliation="{{ proj.affiliation }}" data-tags="{{ proj.tags | join: '|' }}"{% unless proj.affiliation == default_tab %} hidden{% endunless %}{% if has_details %} tabindex="0" role="button" aria-expanded="false" aria-controls="project-details-{{ forloop.index }}"{% endif %}>
           <p class="project-title">{{ proj.title }}{% if proj.award %}<span class="project-award"><i class="fa-solid fa-trophy"></i>{{ proj.award }}</span>{% endif %}</p>
           {% if proj.affiliation %}
           <span class="project-affiliation"><i class="fa-solid fa-building"></i>{{ proj.affiliation }}</span>
@@ -154,33 +157,39 @@ layout: default
           {% if proj.summary %}
           <p class="project-summary">{{ proj.summary }}</p>
           {% endif %}
-          {% if proj.tasks %}
-          <div class="project-output">
-            <span class="output-label">담당업무</span>
-            <ul>
-              {% for task in proj.tasks %}
-              <li>{{ task }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          {% endif %}
-          {% if proj.output %}
-          <div class="project-output">
-            <span class="output-label">산출물</span>
-            <ul>
-              {% if proj.output.first %}
-              {% assign output_items = proj.output %}
-              {% else %}
-              {% assign output_items = proj.output | remove: "\n" | split: "," %}
+          {% if has_details %}
+          <div class="project-details" id="project-details-{{ forloop.index }}">
+            <div class="project-details-inner">
+              {% if proj.tasks %}
+              <div class="project-output">
+                <span class="output-label">담당업무</span>
+                <ul>
+                  {% for task in proj.tasks %}
+                  <li>{{ task }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
               {% endif %}
-              {% for item in output_items %}
-              <li>{{ item | strip }}</li>
-              {% endfor %}
-            </ul>
+              {% if proj.output %}
+              <div class="project-output">
+                <span class="output-label">산출물</span>
+                <ul>
+                  {% if proj.output.first %}
+                  {% assign output_items = proj.output %}
+                  {% else %}
+                  {% assign output_items = proj.output | remove: "\n" | split: "," %}
+                  {% endif %}
+                  {% for item in output_items %}
+                  <li>{{ item | strip }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
+              {% if proj.description %}
+              <p class="project-desc">{{ proj.description }}</p>
+              {% endif %}
+            </div>
           </div>
-          {% endif %}
-          {% if proj.description %}
-          <p class="project-desc">{{ proj.description }}</p>
           {% endif %}
           <div class="project-footer">
             {% if proj.period %}
@@ -200,23 +209,87 @@ layout: default
             <a href="{{ proj.demo }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i>Demo</a>
             {% endif %}
           </div>
+          {% if has_details %}
+          <i class="fa-solid fa-chevron-down project-toggle-icon" aria-hidden="true"></i>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
-      {% endfor %}
     </section>
 
   </main>
 </div>
 
 <script>
-  document.querySelectorAll('.project-tab').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      document.querySelectorAll('.project-tab, .project-panel').forEach(function (el) {
-        el.classList.remove('active');
+  (function () {
+    var tabs = document.querySelectorAll('.project-tab');
+    var cards = document.querySelectorAll('.project-card');
+    var skillTags = document.querySelectorAll('.skill-tag');
+    var projects = document.getElementById('projects');
+    var activeSkill = null;
+
+    function selectTab(filter) {
+      tabs.forEach(function (tab) {
+        var on = tab.dataset.filter === filter;
+        tab.classList.toggle('active', on);
+        tab.setAttribute('aria-selected', on);
       });
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.tab).classList.add('active');
+      cards.forEach(function (card) {
+        card.hidden = filter !== 'all' && card.dataset.affiliation !== filter;
+      });
+    }
+
+    function applySkill() {
+      skillTags.forEach(function (tag) {
+        var on = tag.dataset.skill === activeSkill;
+        tag.classList.toggle('active', on);
+        tag.setAttribute('aria-pressed', on);
+      });
+      cards.forEach(function (card) {
+        var tags = card.dataset.tags ? card.dataset.tags.split('|') : [];
+        card.classList.toggle('is-dimmed', activeSkill !== null && tags.indexOf(activeSkill) === -1);
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () { selectTab(tab.dataset.filter); });
     });
-  });
+
+    skillTags.forEach(function (tag) {
+      var used = Array.prototype.some.call(cards, function (card) {
+        return card.dataset.tags.split('|').indexOf(tag.dataset.skill) !== -1;
+      });
+      if (!used) { tag.disabled = true; return; }
+      tag.addEventListener('click', function () {
+        activeSkill = activeSkill === tag.dataset.skill ? null : tag.dataset.skill;
+        if (activeSkill !== null) {
+          selectTab('all');
+          // 모바일에서는 사이드바가 위에 있어 결과가 보이도록 이동
+          if (window.matchMedia('(max-width: 780px)').matches) {
+            projects.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+        applySkill();
+      });
+    });
+
+    function toggleCard(card) {
+      var open = card.getAttribute('aria-expanded') !== 'true';
+      card.setAttribute('aria-expanded', open);
+    }
+
+    document.querySelectorAll('.project-card.is-collapsible').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        toggleCard(card);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.target !== card) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard(card);
+        }
+      });
+    });
+  })();
 </script>
