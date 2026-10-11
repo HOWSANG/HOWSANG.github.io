@@ -366,6 +366,27 @@ layout: default
   (function () {
     var tabs = document.querySelectorAll('.project-tab');
     var cards = document.querySelectorAll('.project-card');
+    var grid = document.querySelector('.project-grid');
+    var allCards = Array.prototype.slice.call(cards);
+    var wide = window.matchMedia('(min-width: 781px)');
+
+    // 카드를 왼쪽·오른쪽 독립된 열에 번갈아 배치해서, 한쪽 카드를 펼쳐도 다른 열은 움직이지 않게 함
+    function layout() {
+      var count = wide.matches ? 2 : 1, cols = [];
+      grid.textContent = '';
+      for (var i = 0; i < count; i++) {
+        var col = document.createElement('div');
+        col.className = 'project-col';
+        grid.appendChild(col);
+        cols.push(col);
+      }
+      allCards.filter(function (c) { return !c.hidden; })
+        .forEach(function (c, i) { cols[i % count].appendChild(c); });
+      allCards.filter(function (c) { return c.hidden; })
+        .forEach(function (c) { cols[0].appendChild(c); });
+    }
+    grid.classList.add('is-masonry');
+    wide.addEventListener('change', layout);
     var skillTags = document.querySelectorAll('.skill-tag');
     var projects = document.getElementById('projects');
     var activeSkill = null;
@@ -379,6 +400,7 @@ layout: default
       cards.forEach(function (card) {
         card.hidden = filter !== 'all' && card.dataset.affiliation !== filter;
       });
+      layout();
     }
 
     function applySkill() {
@@ -396,6 +418,7 @@ layout: default
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () { selectTab(tab.dataset.filter); });
     });
+    layout();
 
     skillTags.forEach(function (tag) {
       var used = Array.prototype.some.call(cards, function (card) {
